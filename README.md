@@ -20,7 +20,7 @@ A **Bearing Fault Detection System** that uses **Wavelet Transform** for feature
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/bearing-fault-detection.git
+git clone https://github.com/omkar2203030/Capstone_LSTM_model.git
 cd bearing-fault-detection
 
 # Install dependencies
