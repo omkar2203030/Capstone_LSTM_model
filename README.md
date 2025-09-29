@@ -1,88 +1,78 @@
 # Capstone_LSTM_model
 
 
-🛠️ Bearing Fault Detection using LSTM & Wavelet Transform
+# 🛠️ Bearing Fault Detection using LSTM & Wavelet Transform
 
-This project is a Bearing Fault Detection System that uses Wavelet Transform for feature extraction and an LSTM (Long Short-Term Memory) deep learning model to classify bearing health conditions. The system also provides FFT (Fast Fourier Transform) visualizations for vibration signals.
+A **Bearing Fault Detection System** that uses **Wavelet Transform** for feature extraction and an **LSTM (Long Short-Term Memory)** model to classify bearing health conditions. The system also provides **FFT (Fast Fourier Transform) visualizations** for vibration signals.
 
-It includes:
+## 📂 Dataset
 
-🧾 Preprocessing & Model Training (Python + TensorFlow)
+* **Source:** HUST Bearing Dataset (Huazhong University of Science and Technology)
+* **Sample file:** `final.csv`
+* **Features:**
 
-🌐 Flask Backend for inference & serving predictions
+  * `Time_Col` → Timestamp (numeric)
+  * `X, Y, Z` → Vibration signals along three axes
+  * `Output` → Bearing condition label (`Healthy`, `Inner Fault`, `Outer Fault`, `Ball Fault`, etc.)
 
-💻 Frontend (HTML/JS) to upload CSV files and visualize results
 
-📊 Visualization of FFT plots for X, Y, Z vibration signals
+## ⚙️ Installation
 
-📂 Dataset
-
-We use the HUST Bearing Dataset (Huazhong University of Science and Technology), which contains vibration signals for bearings under different working conditions and fault types.
-
-Features in dataset (final.csv format):
-
-Time_Col → Time stamp (numeric)
-
-X, Y, Z → Vibration signal values along three axes
-
-Output → Bearing condition label (e.g., Healthy, Inner Fault, Outer Fault, Ball Fault, etc.)
-
-⚙️ Installation
-
-Clone the repository and install dependencies:
-
+```bash
+# Clone repository
 git clone https://github.com/yourusername/bearing-fault-detection.git
 cd bearing-fault-detection
 
-Install required Python packages:
-
+# Install dependencies
 pip install flask flask-cors pywavelets tensorflow scikit-learn pandas numpy matplotlib python-dotenv
+```
 
-🏋️ Model Training
+---
 
-Run the training script to:
+## 🏋️ Model Training
 
-Preprocess the dataset
+Run the training script:
 
-Extract wavelet features
-
-Create sequences for LSTM
-
-Train the LSTM model
-
-Save the trained model + scaler + label encoder
-
-
+```bash
 python train_model.py
+```
 
-This will generate:
+This will:
 
-bearing_fault_model.h5 → Trained LSTM model
+* Preprocess dataset
+* Extract wavelet features
+* Create sequences for LSTM
+* Train the LSTM model
 
-scaler.pkl → StandardScaler for normalization
+Generated files:
 
-label_encoder.pkl → Encoder for output labels
+* `bearing_fault_model.h5` → Trained LSTM model
+* `scaler.pkl` → StandardScaler for normalization
+* `label_encoder.pkl` → Encoder for output labels
 
-🚀 Running the Flask App
 
-Start the Flask server:
+## 🚀 Running the Flask App
 
+Start the server:
+
+```bash
 python app.py
+```
 
-The app will run on http://127.0.0.1:5000/
+* App runs at → `http://127.0.0.1:4001/`
+* Upload `.csv` file via frontend (`index.html`)
 
-🌐 Web Interface
 
-Open the frontend (index.html) in a browser
+## 🌐 Web Interface
 
-Upload a .csv file with vibration data (X, Y, Z, Time_Col)
+* Upload `.csv` with columns: `Time_Col, X, Y, Z`
+* Get **predictions + most common fault type**
+* View **FFT plots** for X, Y, Z axes
 
-Get predictions + most common fault type
 
-FFT plots of X, Y, Z axes will be displayed
+## 📊 Example API Response
 
-📊 Example Prediction Output
-
+```json
 {
   "predictions": ["Healthy", "Healthy", "Outer Fault", "Outer Fault"],
   "most_common": "Outer Fault",
@@ -92,44 +82,40 @@ FFT plots of X, Y, Z axes will be displayed
     "z": "base64string..."
   }
 }
+```
 
-📁 Project Structure
 
+## 📁 Project Structure
+
+```
 ├── app.py                  # Flask backend
 ├── train_model.py          # Model training script
 ├── templates/
-│   └── index.html          # Frontend
+│   └── index.html          # Frontend UI
 ├── bearing_fault_model.h5  # Trained LSTM model
 ├── scaler.pkl              # Scaler for features
 ├── label_encoder.pkl       # Output label encoder
 ├── final.csv               # Preprocessed HUST dataset sample
 └── README.md               # Project documentation
-
-🧑‍💻 Technologies Used
-
-Python (Data Processing + ML)
-
-TensorFlow/Keras (LSTM model)
-
-PyWavelets (Wavelet Transform feature extraction)
-
-Matplotlib (FFT plots)
-
-Flask (Backend API)
-
-HTML/JS (Frontend UI)
-
-📌 Future Improvements
-
-Integrate with real-time sensor data streaming
-
-Deploy on Docker / Cloud for scalability
-
-Add more advanced wavelet families and feature extraction methods
-
-Improve frontend UI with React.js or TailwindCSS
+```
 
 
----
+## 🧑‍💻 Technologies Used
 
-Do you want me to also write the train_model.py file separately (clean version of the first part of your script) so that your project folder has a clear separation between training and deployment?
+* **Python** → Data processing + ML
+* **TensorFlow / Keras** → LSTM model
+* **PyWavelets** → Wavelet Transform feature extraction
+* **Matplotlib** → FFT plots
+* **Flask + flask-cors** → Backend API
+* **HTML/JS** → Frontend UI
+
+## 📌 Future Improvements
+
+* ✅ Integrate real-time sensor data streaming
+* ✅ Docker / Cloud deployment
+* ✅ More advanced wavelet families & features
+* ✅ Better frontend (React.js, TailwindCSS)
+* ✅ Try Bi-LSTM / CNN-LSTM / Attention-based models
+* ✅ Add explainability (e.g., SHAP)
+
+
