@@ -115,7 +115,6 @@ python app.py
 * ✅ Docker / Cloud deployment
 * ✅ More advanced wavelet families & features
 * ✅ Better frontend (React.js, TailwindCSS)
-* ✅ Try Bi-LSTM / CNN-LSTM / Attention-based models
-* ✅ Add explainability (e.g., SHAP)
+
 
 
