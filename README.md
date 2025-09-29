@@ -21,7 +21,7 @@ A **Bearing Fault Detection System** that uses **Wavelet Transform** for feature
 ```bash
 # Clone repository
 git clone https://github.com/omkar2203030/Capstone_LSTM_model.git
-cd bearing-fault-detection
+cd Capstone_LSTM_model
 
 # Install dependencies
 pip install flask flask-cors pywavelets tensorflow scikit-learn pandas numpy matplotlib python-dotenv
