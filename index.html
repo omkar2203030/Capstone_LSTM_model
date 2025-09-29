@@ -1,0 +1,439 @@
+{# <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bearing Fault Detection</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        padding: 40px;
+        text-align: center;
+      }
+
+      h1 {
+        color: #333;
+      }
+
+      form {
+        margin: 20px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        max-width: 500px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      input[type="file"] {
+        margin-bottom: 15px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #218838;
+      }
+
+      .result {
+        margin-top: 30px;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      img {
+        max-width: 100%;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Bearing Fault Detection</h1>
+
+    <form id="uploadForm">
+      <input
+        type="file"
+        name="file"
+        id="fileInput"
+        accept=".csv"
+        required
+      /><br />
+      <button type="submit">Upload & Predict</button>
+    </form>
+
+    <div class="result" id="resultBox" style="display: none">
+      <h3>Prediction Summary</h3>
+      <p><strong>Most Common Fault:</strong> <span id="summary"></span></p>
+      <h4>FFT Plots</h4>
+      <img id="fftX" alt="FFT X Axis" />
+      <img id="fftY" alt="FFT Y Axis" />
+      <img id="fftZ" alt="FFT Z Axis" />
+    </div>
+
+    <script>
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const fileInput = document.getElementById("fileInput");
+          if (fileInput.files.length === 0) {
+            alert("Please select a CSV file!");
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("file", fileInput.files[0]);
+
+          try {
+            const res = await fetch("/predict", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await res.json();
+            console.log(data);
+            if (data.error) {
+              alert("Error: " + data.error);
+              return;
+            }
+
+            document.getElementById("resultBox").style.display = "block";
+            document.getElementById("summary").innerText = data.most_common;
+
+            document.getElementById(
+              "fftX"
+            ).src = `data:image/png;base64,${data.fft_images.x}`;
+            document.getElementById(
+              "fftY"
+            ).src = `data:image/png;base64,${data.fft_images.y}`;
+            document.getElementById(
+              "fftZ"
+            ).src = `data:image/png;base64,${data.fft_images.z}`;
+          } catch (error) {
+            console.log(error);
+            alert("Something went wrong while predicting.");
+          }
+        });
+    </script>
+  </body>
+</html>
+#}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bearing Fault Detection</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(to right, #0f0f0f, #2b2b2b);
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 30px;
+        text-align: center;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .cards {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .card {
+        background: linear-gradient(145deg, #1c1c1c, #2b2b2b);
+        padding: 30px;
+        width: 220px;
+        border-radius: 20px;
+        text-align: center;
+        box-shadow: 0 8px 16px rgba(255, 255, 255, 0.05);
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 2px solid transparent;
+      }
+
+      .card:hover {
+        transform: scale(1.08);
+        box-shadow: 0 12px 24px rgba(255, 255, 255, 0.1);
+        border-color: #ffffff44;
+      }
+
+      .animation {
+        margin: 20px auto;
+        text-align: center;
+      }
+
+      .animation img {
+        width: 300px;
+        max-width: 90vw;
+        border-radius: 10px;
+      }
+
+      .upload-section {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 90%;
+        max-width: 700px;
+        background-color: #1c1c1c;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        margin-top: 30px;
+      }
+
+      .upload-section.active {
+        display: flex;
+      }
+
+      .upload-section h2 {
+        margin-bottom: 20px;
+        font-size: 1.8rem;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      }
+
+      input[type="file"] {
+        margin: 15px 0;
+        padding: 10px;
+        border-radius: 8px;
+        border: 2px solid #444;
+        background-color: #2a2a2a;
+        color: white;
+        width: 100%;
+      }
+
+      input[type="file"]::file-selector-button {
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #444;
+        color: white;
+        border: none;
+        transition: background 0.3s ease;
+      }
+
+      input[type="file"]::file-selector-button:hover {
+        background-color: #666;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #444;
+        border: none;
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #666;
+      }
+
+      .result {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #2a2a2a;
+        border-radius: 15px;
+        width: 100%;
+        max-width: 700px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+      }
+
+      img {
+        max-width: 100%;
+        margin: 10px 0;
+        border: 1px solid #555;
+        border-radius: 10px;
+      }
+
+      .loading {
+        color: #ff6600;
+        font-weight: bold;
+        margin-top: 15px;
+      }
+      .plot_head {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Bearing Fault Detection</h1>
+
+    <div class="cards">
+      <div class="card" onclick="openUpload()">Upload for Classification</div>
+    </div>
+
+    <div class="animation">
+      <img
+        src="https://cdna.artstation.com/p/assets/images/images/021/986/092/original/robert-burke-bearing.gif?1573677512"
+        alt="Bearing Animation"
+      />
+    </div>
+
+    <div id="uploadSection" class="upload-section">
+      <h2>Select CSV File</h2>
+      <form id="uploadForm">
+        <input type="file" name="file" id="fileInput" accept=".csv" required />
+        <button type="submit">Upload & Predict</button>
+      </form>
+
+      <p id="loading" class="loading" style="display: none">
+        Processing... Please wait.
+      </p>
+
+      <div class="result" id="resultBox" style="display: none">
+        <h3>Prediction Summary</h3>
+        <p><strong>Most Common Fault:</strong> <span id="summary"></span></p>
+        <h4 id="accuracyResult"></h4>
+        <h4 id="locationResult"></h4>
+
+        <h4 class="plot_head">FFT Plots</h4>
+        <img id="fftX" alt="FFT X Axis" />
+        <img id="fftY" alt="FFT Y Axis" />
+        <img id="fftZ" alt="FFT Z Axis" />
+      </div>
+    </div>
+
+    <script>
+      function openUpload() {
+        document.getElementById("uploadSection").classList.add("active");
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: "smooth",
+        });
+      }
+
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const fileInput = document.getElementById("fileInput");
+          if (fileInput.files.length === 0) {
+            alert("Please select a CSV file!");
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append("file", fileInput.files[0]);
+
+          const loading = document.getElementById("loading");
+          loading.style.display = "block";
+
+          try {
+            const res = await fetch("/predict", {
+              method: "POST",
+              body: formData,
+            });
+
+            const data = await res.json();
+            loading.style.display = "none";
+
+            if (data.error) {
+              alert("Error: " + data.error);
+              return;
+            }
+
+            document.getElementById("resultBox").style.display = "block";
+
+            const prediction = data.most_common || "Unknown";
+            document.getElementById("summary").innerText = prediction;
+
+            document.getElementById(
+              "fftX"
+            ).src = `data:image/png;base64,${data.fft_images.x}`;
+            document.getElementById(
+              "fftY"
+            ).src = `data:image/png;base64,${data.fft_images.y}`;
+            document.getElementById(
+              "fftZ"
+            ).src = `data:image/png;base64,${data.fft_images.z}`;
+
+            let defectSize = "";
+            let faultLocation = "";
+
+            const sizeMatch = prediction.match(/^([\d.]+)X/);
+            if (sizeMatch) {
+              defectSize = sizeMatch[1] + " mm";
+            }
+
+            if (prediction.includes("_O_")) {
+              faultLocation = "Outer Race";
+
+              document.getElementById(
+                "accuracyResult"
+              ).innerText = `Defect Size: ${defectSize}`;
+              document.getElementById(
+                "locationResult"
+              ).innerText = `Location: ${faultLocation}`;
+              document.getElementById("locationResult").style.color = "red";
+            } else if (prediction.includes("_I_")) {
+              faultLocation = "Inner Race";
+
+              document.getElementById(
+                "accuracyResult"
+              ).innerText = `Defect Size: ${defectSize}`;
+              document.getElementById(
+                "locationResult"
+              ).innerText = `Location: ${faultLocation}`;
+              document.getElementById("locationResult").style.color = "orange";
+            } else if (prediction.includes("_B_")) {
+              faultLocation = "Ball";
+
+              document.getElementById(
+                "accuracyResult"
+              ).innerText = `Defect Size: ${defectSize}`;
+              document.getElementById(
+                "locationResult"
+              ).innerText = `Location: ${faultLocation}`;
+              document.getElementById("locationResult").style.color =
+                "darkblue";
+            } else {
+              document.getElementById(
+                "accuracyResult"
+              ).innerText = `No any Defect in the Bearing`;
+              document.getElementById(
+                "locationResult"
+              ).innerText = `Bearing is Healthy`;
+              document.getElementById("locationResult").style.color = "green";
+            }
+          } catch (error) {
+            loading.style.display = "none";
+            console.error(error);
+            alert("Something went wrong while predicting.");
+          }
+        });
+    </script>
+  </body>
+</html>
